@@ -1,5 +1,5 @@
 export const WEBHOOK_DEAL_CLOSED =
-  'https://api.vanguardmotorshub.com/webhook/deal-closed-whatsapp'
+  'https://api.deltarentalsdubai.com/webhook/deal-closed--vanguard-whatsapp'
 
 export type LeadFilter = 'all' | 'today' | '30' | 'date'
 
