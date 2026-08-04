@@ -27,6 +27,7 @@ function mapRow(row: Record<string, unknown>): WhatsAppLead {
     id: row.id as string | number,
     inquiry_time: row.inquiry_time as string,
     gclid: (row.gclid as string) || null,
+    vipcode: (row.vipcode as string) || null,
     utm_source: (row.utm_source as string) || null,
     utm_campaign: (row.utm_campaign as string) || null,
     country: (row.country as string) || 'Unknown',
@@ -45,7 +46,8 @@ function buildPayload(lead: WhatsAppLead, phone: string, amount: number): DealCl
     closed_at: new Date().toISOString(),
     click_id: lead.id,
     inquiry_time: lead.inquiry_time,
-    gclid: lead.gclid,
+    gclid: lead.gclid || null,
+    vipcode: lead.vipcode?.trim() || null,
     utm_source: lead.utm_source,
     utm_campaign: lead.utm_campaign,
     country: lead.country,
@@ -77,7 +79,7 @@ export function CloseDealPage() {
     const { data, error } = await supabaseData
       .from('whatsapp_clicks')
       .select(
-        'id,inquiry_time,gclid,utm_source,utm_campaign,country,country_code,city,region,lead_value,whatsapp_number,closed_time',
+        'id,inquiry_time,gclid,vipcode,utm_source,utm_campaign,country,country_code,city,region,lead_value,whatsapp_number,closed_time',
       )
       .order('inquiry_time', { ascending: false })
       .limit(2000)
@@ -235,7 +237,7 @@ export function CloseDealPage() {
               placeholder={
                 activeFilter === 'date' && !selectedDate
                   ? 'Pick a date above first…'
-                  : 'Search leads by date, city, country, phone, GCLID…'
+                  : 'Search leads by date, city, country, VIP code, phone, GCLID…'
               }
             />
             <p className="text-right text-xs text-neutral-500">
@@ -257,9 +259,34 @@ export function CloseDealPage() {
                     : 'border-neutral-200 bg-neutral-50 text-neutral-700',
                 ].join(' ')}
               >
-                <span className="font-semibold">Selected:</span>{' '}
-                {formatDubaiDateTime(selectedLead.inquiry_time)} ·{' '}
-                {selectedLead.city ? `${selectedLead.city}, ${selectedLead.country}` : selectedLead.country}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span
+                    className={[
+                      'inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-extrabold tracking-wide',
+                      selectedLead.vipcode
+                        ? 'bg-amber-400 text-amber-950 ring-1 ring-amber-500/40'
+                        : 'bg-neutral-200 text-neutral-500',
+                    ].join(' ')}
+                  >
+                    {selectedLead.vipcode ? selectedLead.vipcode : 'No VIP'}
+                  </span>
+                  <span
+                    className={[
+                      'inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-extrabold tracking-wide',
+                      selectedLead.gclid
+                        ? 'bg-neutral-900 text-white ring-1 ring-neutral-700/40'
+                        : 'bg-neutral-200 text-neutral-500',
+                    ].join(' ')}
+                  >
+                    {selectedLead.gclid ? 'GCLID ✓' : 'No GCLID'}
+                  </span>
+                </div>
+                <p className="mt-1.5 text-xs text-neutral-600">
+                  {formatDubaiDateTime(selectedLead.inquiry_time)} ·{' '}
+                  {selectedLead.city
+                    ? `${selectedLead.city}, ${selectedLead.country}`
+                    : selectedLead.country}
+                </p>
                 {isLeadSaved(selectedLead) && (
                   <p className="mt-1 text-xs font-semibold text-green-800">
                     Saved · {selectedLead.whatsapp_number} · AED{' '}

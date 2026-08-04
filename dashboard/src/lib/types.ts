@@ -1,5 +1,5 @@
 export const WEBHOOK_DEAL_CLOSED =
-  'https://api.deltarentalsdubai.com/webhook/deal-closed--vanguard-whatsapp'
+  'https://api.deltarentalsdubai.com/webhook/deal-closed-vanguard-whatsapp'
 
 export type LeadFilter = 'all' | 'today' | '30' | 'date'
 
@@ -7,6 +7,7 @@ export type WhatsAppLead = {
   id: string | number
   inquiry_time: string
   gclid: string | null
+  vipcode?: string | null
   utm_source: string | null
   utm_campaign: string | null
   country: string
@@ -37,6 +38,7 @@ export type DealClosedPayload = {
   click_id: string | number
   inquiry_time: string
   gclid: string | null
+  vipcode: string | null
   utm_source: string | null
   utm_campaign: string | null
   country: string

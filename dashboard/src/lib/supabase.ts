@@ -10,6 +10,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 /**
  * Data reads always use the anon key (same as the original HTML/PHP tools).
  * The auth client attaches the logged-in JWT, which can be blocked by RLS.
+ * Ensure anon SELECT policy exists on whatsapp_clicks (see migration 002).
  */
 export const supabaseData = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {

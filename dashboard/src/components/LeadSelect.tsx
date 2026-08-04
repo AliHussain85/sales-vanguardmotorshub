@@ -27,6 +27,7 @@ function buildSearchText(lead: WhatsAppLead): string {
     lead.country_code,
     lead.city,
     lead.region,
+    lead.vipcode,
     lead.whatsapp_number,
     lead.lead_value,
   ]
@@ -41,10 +42,11 @@ export function buildLeadOptions(leads: WhatsAppLead[]): LeadOption[] {
     const saved = isLeadSaved(lead)
     const place = lead.city ? `${lead.city}, ${lead.country}` : lead.country
     const gclidTag = lead.gclid ? 'GCLID ✓' : 'No GCLID'
+    const vipTag = lead.vipcode ? lead.vipcode : 'No VIP'
     const prefix = saved ? '✓ Saved · ' : ''
     return {
       value: id,
-      label: `${prefix}${formatDubaiDateTime(lead.inquiry_time)} — ${gclidTag} · ${place} · ${lead.country_code || '—'}`,
+      label: `${prefix}${vipTag} · ${gclidTag} — ${formatDubaiDateTime(lead.inquiry_time)} · ${place}`,
       lead,
       saved,
       searchText: buildSearchText(lead),
@@ -61,6 +63,36 @@ function optionBackground(saved: boolean, isSelected: boolean, isFocused: boolea
   if (isSelected) return 'bg-neutral-100'
   if (isFocused) return 'bg-neutral-50'
   return 'bg-white'
+}
+
+function VipBadge({ code }: { code?: string | null }) {
+  if (code) {
+    return (
+      <span className="inline-flex items-center rounded-md bg-amber-400 px-2 py-0.5 text-[11px] font-extrabold tracking-wide text-amber-950 shadow-sm ring-1 ring-amber-500/40">
+        {code}
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center rounded-md bg-neutral-200/80 px-2 py-0.5 text-[11px] font-bold tracking-wide text-neutral-500">
+      No VIP
+    </span>
+  )
+}
+
+function GclidBadge({ gclid }: { gclid?: string | null }) {
+  if (gclid) {
+    return (
+      <span className="inline-flex items-center rounded-md bg-neutral-900 px-2 py-0.5 text-[11px] font-extrabold tracking-wide text-white shadow-sm ring-1 ring-neutral-700/40">
+        GCLID ✓
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center rounded-md bg-neutral-200/80 px-2 py-0.5 text-[11px] font-bold tracking-wide text-neutral-500">
+      No GCLID
+    </span>
+  )
 }
 
 function LeadOptionRow(props: OptionProps<LeadOption, false, GroupBase<LeadOption>>) {
@@ -81,11 +113,12 @@ function LeadOptionRow(props: OptionProps<LeadOption, false, GroupBase<LeadOptio
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-neutral-900">
-            {formatDubaiDateTime(data.lead.inquiry_time)}
-          </p>
-          <p className="mt-1 text-xs text-neutral-600">
-            {data.lead.gclid ? 'GCLID ✓' : 'No GCLID'} · {place} · {data.lead.country_code || '—'}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <VipBadge code={data.lead.vipcode} />
+            <GclidBadge gclid={data.lead.gclid} />
+          </div>
+          <p className="mt-1.5 text-xs text-neutral-500">
+            {formatDubaiDateTime(data.lead.inquiry_time)} · {place} · {data.lead.country_code || '—'}
           </p>
           {data.saved && phone && amount !== null && (
             <p className="mt-1.5 text-xs font-semibold text-green-800">
@@ -151,7 +184,7 @@ export function LeadSelect({
   onChange,
   loading = false,
   disabled = false,
-  placeholder = 'Search leads by date, city, country, GCLID…',
+  placeholder = 'Search leads by date, city, country, VIP code, GCLID…',
 }: LeadSelectProps) {
   const selected = options.find((opt) => opt.value === value) ?? null
 
